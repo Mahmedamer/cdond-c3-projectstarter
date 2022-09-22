@@ -1,16 +1,6 @@
 version: 2.1
 
 commands:
-  install_awscli:
-    description: Install AWS CLI v2
-    steps:
-      - run:
-          name: Install AWS CLI v2
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-  
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.   
     steps:
@@ -182,11 +172,6 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - run:
-          name : Install curl for AWS
-          command: |
-            apk add curl
-      - install_awscli
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]
       - attach_workspace:
@@ -200,14 +185,12 @@ jobs:
           command: |
               cd .circleci/ansible
               ansible-playbook -i ~/inventory.txt configure-server.yml
-      - destroy-environment
   
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - install_awscli
       - run:
           name: Run migrations
           command: |
@@ -222,7 +205,6 @@ jobs:
             then
                 curl https://kvdb.io/WAv8Sce8Z4G7YgnXmPtY4D/migration_${CIRCLE_WORKFLOW_ID:0:7} -k -d '1'
             fi
-      - destroy-environment
       - revert-migrations
      # Here's where you will add some code to rollback on failure    
 

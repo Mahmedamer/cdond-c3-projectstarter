@@ -7,7 +7,6 @@ commands:
       - run:
           name: Install AWS CLI v2
           command: |
-            apt install -y curl
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
@@ -183,6 +182,10 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run:
+        name : Install curl for AWS
+        command: |
+          apk add curl
       - install_awscli
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]

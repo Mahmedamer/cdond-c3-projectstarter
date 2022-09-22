@@ -138,14 +138,12 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Project,Values=udapeople" \
             --output text >> inventory.txt 
-            pwd
-            cat inventory.txt
       - run:
           name: Install tar utility
           command: |
             yum install -y tar gzip
       - persist_to_workspace:
-          root: inventory
+          root: /tmp/inventory
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
@@ -158,7 +156,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]
       - attach_workspace:
-          at: ~/inventory
+          at: /tmp/inventory
       - run:
           name: Install dependencies
           command: |
@@ -166,9 +164,9 @@ jobs:
       - run:
           name: Configure server
           command: |
-              cat ~/inventory/inventory.txt
+              cat /tmp/inventory/inventory.txt
               cd .circleci/ansible
-              ansible-playbook -i ~/inventory/inventory.txt configure-server.yml
+              ansible-playbook -i /tmp/inventory/inventory.txt configure-server.yml
       
 workflows:
   default:

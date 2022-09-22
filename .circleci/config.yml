@@ -131,12 +131,12 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            touch inventory.txt
-            echo [web] > inventory.txt
+            touch ~/inventory.txt
+            echo [web] > ~/inventory.txt
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Project,Values=udapeople" \
-            --output text >> inventory.txt 
+            --output text >> ~/inventory.txt 
       - run:
           name: Install tar utility
           command: |

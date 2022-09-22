@@ -131,7 +131,6 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            cd .circleci/ansible
             touch inventory.txt
             echo [web] > inventory.txt
             aws ec2 describe-instances \
@@ -143,9 +142,9 @@ jobs:
           command: |
             yum install -y tar gzip
       - persist_to_workspace:
-          root: project/.circleci/ansible
+          root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - inventory.txt
       - destroy-environment
 
   configure-infrastructure:
@@ -156,7 +155,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]
       - attach_workspace:
-          at: project/.circleci/ansible
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -165,8 +164,8 @@ jobs:
           name: Configure server
           command: |
               cd .circleci/ansible
-              cat inventory.txt
-              ansible-playbook -i inventory.txt configure-server.yml
+              cat ~/inventory.txt
+              ansible-playbook -i ~/inventory.txt configure-server.yml
       
 workflows:
   default:

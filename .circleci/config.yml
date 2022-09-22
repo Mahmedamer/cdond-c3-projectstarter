@@ -183,9 +183,9 @@ jobs:
     steps:
       - checkout
       - run:
-        name : Install curl for AWS
-        command: |
-          apk add curl
+          name : Install curl for AWS
+          command: |
+            apk add curl
       - install_awscli
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]

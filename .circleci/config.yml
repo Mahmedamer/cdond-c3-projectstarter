@@ -50,7 +50,7 @@ commands:
             apt update
             apt-get install ca-certificates -y
             apt install software-properties-common -y
-            add-apt-repository --yes --remove ppa:ansible/ansible
+            add-apt-repository --remove ppa:ansible/ansible
             add-apt-repository --yes --update ppa:ansible/ansible
             apt install ansible -y
 
@@ -196,7 +196,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_ansible
+      #- install_ansible
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]
       - attach_workspace:
@@ -204,7 +204,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible
+            apt install ansible -y
       - run:
           name: Configure server
           command: |

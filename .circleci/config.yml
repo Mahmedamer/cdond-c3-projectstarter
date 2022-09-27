@@ -50,7 +50,7 @@ commands:
             apt update
             apt-get install ca-certificates -y
             apt install software-properties-common -y
-            add-apt-repository --remove ppa:ansible/ansible
+            add-apt-repository --yes --remove ppa:ansible/ansible
             add-apt-repository --yes --update ppa:ansible/ansible
             apt install ansible -y
 

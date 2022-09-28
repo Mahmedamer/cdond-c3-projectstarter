@@ -30,16 +30,6 @@ commands:
               npm install
               npm run migration:revert
             fi
-  
-  install_awscli:
-      description: Install AWS CLI v2
-      steps:
-        - run:
-            name: Install AWS CLI v2
-            command: |
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              ./aws/install
 
 jobs:
   build-frontend:
@@ -182,7 +172,12 @@ jobs:
       - image: python:3.7
     steps:
       - checkout
-      - install_awscli
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            ./aws/install
       - add_ssh_keys:
           fingerprints: ["91:d9:ab:12:d4:97:f6:63:0d:2c:8a:eb:34:54:9f:21"]
       - attach_workspace:
@@ -229,6 +224,39 @@ jobs:
             fi
       - revert-migrations
       - destroy-environment
+  
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-deps]
+      - run:
+          name: Install dependencies
+          command: |
+            apt install npm -y
+            cd frontend
+            npm install
+      - run:
+          name: Get backend url
+          command: |
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - revert-migrations
+      - destroy-environment
 
 workflows:
   default:
@@ -249,3 +277,5 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
